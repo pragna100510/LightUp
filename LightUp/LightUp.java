@@ -8,17 +8,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 /**
- * LightUp (Akari) puzzle - Random 7x7 with Smart AI, Undo/Redo, and Team Win popup
+ * LightUp puzzle - Random 7x7 grid with Smart Computer move
  *
  * Features:
- * - Only these buttons: New Game, Restart Game, Undo Move, Redo Move, Solve Game
- * - Smart AI: evaluates all legal moves and plays the best-scoring safe move deterministically
+ * - Buttons: New Game, Restart Game, Undo Move, Redo Move, Solve Game
+ * - Computer Move: evaluates all legal moves and plays the best-scoring safe move
  * - Undo/Redo: complete board-state snapshots for reliable undo/redo of both user and AI moves
  * - "Team win" popup: when the final solved state was achieved with both user and AI contributing
  *
  * AI guarantees:
- * - Exactly ONE mutation per AI turn: either remove one violating bulb or place one bulb. Never both.
- * - Enforce removal returns immediately after fix (no follow-on placement).
+ * - Exactly ONE move per AI turn: either remove one violating bulb or place one bulb
  * - Deterministic tie-breaking using a merge-sorted centrality order map.
  */
 public class LightUp extends JFrame {
@@ -98,7 +97,7 @@ public class LightUp extends JFrame {
     // Merge-sort order map for tie-breaking
     private Map<Integer, Integer> centralityOrder = new HashMap<>();
 
-    // Undo/Redo via full board snapshots
+    // Undo/Redo 
     static class BoardState {
         boolean[][] bulbs;
         boolean[][] dots;
@@ -175,7 +174,7 @@ public class LightUp extends JFrame {
                 attempts++;
             }
 
-            // Add numbered cells (4-5) onto some existing black cells, numbers 0..blanks
+            // Add numbered cells (4-5) onto some existing black cells
             List<String> blackPosList = new ArrayList<>(blackPositions);
             Collections.shuffle(blackPosList);
             int numberedCount = 0;
@@ -195,7 +194,6 @@ public class LightUp extends JFrame {
                 }
             }
 
-            // Check solvability quickly via backtracking
             if (isPuzzleSolvable()) puzzleValid = true;
         }
 
@@ -445,7 +443,6 @@ public class LightUp extends JFrame {
         setLayout(new BorderLayout(0, 0));
         getContentPane().setBackground(BG_COLOR);
         
-        // Create minimalist header
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(PANEL_BG);
         headerPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -478,12 +475,10 @@ public class LightUp extends JFrame {
         
         add(headerPanel, BorderLayout.NORTH);
         
-        // Create main content panel
         JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
         mainPanel.setBackground(BG_COLOR);
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         
-        // Create game grid with minimalist design
         JPanel gridContainer = new JPanel(new BorderLayout());
         gridContainer.setBackground(BG_COLOR);
         gridContainer.setBorder(BorderFactory.createEmptyBorder());
@@ -528,7 +523,6 @@ public class LightUp extends JFrame {
         gridContainer.add(gridPanel, BorderLayout.CENTER);
         mainPanel.add(gridContainer, BorderLayout.CENTER);
         
-        // Create control panel with minimalist design
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
         controlPanel.setBackground(PANEL_BG);
@@ -537,7 +531,6 @@ public class LightUp extends JFrame {
             new EmptyBorder(20, 15, 20, 15)
         ));
         
-        // Create buttons with clean design
         newGameBtn = createMinimalButton("New Game", new Color(70, 130, 180));
         restartBtn = createMinimalButton("Restart", new Color(65, 105, 225));
         undoBtn = createMinimalButton("Undo", new Color(72, 61, 139));
@@ -616,7 +609,6 @@ public class LightUp extends JFrame {
         controlPanel.add(Box.createVerticalStrut(8));
         controlPanel.add(solveBtn);
         
-        // Add move counter at bottom of control panel
         JPanel counterPanel = new JPanel();
         counterPanel.setBackground(PANEL_BG);
         counterPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
@@ -633,7 +625,6 @@ public class LightUp extends JFrame {
         
         add(mainPanel, BorderLayout.CENTER);
         
-        // Create minimalist status bar
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.setBackground(PANEL_BG);
         statusPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -647,7 +638,6 @@ public class LightUp extends JFrame {
         
         statusPanel.add(statusLabel, BorderLayout.WEST);
         
-        // Add current mode indicator
         JLabel modeLabel = new JLabel("7×7 Puzzle");
         modeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         modeLabel.setForeground(new Color(140, 150, 170));
@@ -674,7 +664,6 @@ public class LightUp extends JFrame {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        // Add minimalist hover effect
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -722,8 +711,7 @@ public class LightUp extends JFrame {
             }
             return;
         }
-
-        // Simply place the bulb - NO AUTO-FIX
+        
         cell.bulb = true;
         cell.dot = false;
 
@@ -1407,11 +1395,9 @@ public class LightUp extends JFrame {
         int offsetX = (w - cellSize * cols) / 2;
         int offsetY = (h - cellSize * rows) / 2;
 
-        // Draw clean grid background
         g2.setColor(GRID_BG);
         g2.fillRect(offsetX, offsetY, cellSize * cols, cellSize * rows);
 
-        // Draw cells
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 int x = offsetX + c * cellSize;
@@ -1419,9 +1405,7 @@ public class LightUp extends JFrame {
 
                 Cell cell = board[r][c];
 
-                // Create cell background
                 if (cell.type == CellType.BLACK || cell.type == CellType.NUMBER) {
-                    // Draw wall cell
                     g2.setColor(WALL_COLOR);
                     g2.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
                     
@@ -1437,7 +1421,6 @@ public class LightUp extends JFrame {
                         g2.drawString(s, x + (cellSize - tw)/2, y + (cellSize + th)/2 - 4);
                     }
                 } else {
-                    // Draw blank cell with lighting effect
                     if (cell.lit) {
                         g2.setColor(LIT_COLOR);
                         g2.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
@@ -1447,7 +1430,6 @@ public class LightUp extends JFrame {
                     }
                 }
 
-                // Draw bulb with clean design (removed middle line)
                 if (cell.bulb) {
                     int bulbSize = cellSize * 3 / 5;
                     int bulbX = x + (cellSize - bulbSize) / 2;
@@ -1477,7 +1459,6 @@ public class LightUp extends JFrame {
                         g2.drawRect(x + 1, y + 1, cellSize - 3, cellSize - 3);
                     }
                 } else if (cell.dot) {
-                    // Draw minimalist dot
                     int dotSize = Math.max(5, cellSize / 7);
                     int dotX = x + (cellSize - dotSize) / 2;
                     int dotY = y + (cellSize - dotSize) / 2;
@@ -1491,7 +1472,6 @@ public class LightUp extends JFrame {
                     g2.drawOval(dotX, dotY, dotSize, dotSize);
                 }
 
-                // Draw conflict overlay
                 boolean conflict = false;
                 if (cell.type == CellType.BLANK && cell.bulb) {
                     for (int rr = r - 1; rr >= 0; rr--) {
